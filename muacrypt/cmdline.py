@@ -252,16 +252,30 @@ def peerstate(ctx, account_name, emailadr):
 @mycommand("process-incoming")
 @account_option_none
 @option_reparse
+@click.option("--cat", "-c", default=False, is_flag=True,
+              help="outputs the content of the processed message")
 @click.pass_context
-def process_incoming(ctx, reparse, account_name):
+def process_incoming(ctx, reparse, account_name, cat):
     """parse Autocrypt info from stdin message
     if it was addressed to one of our managed accounts.
     """
     account_manager = get_account_manager(ctx)
     msg = mime.parse_message_from_file(sys.stdin)
 
+    output_to_stderr = False
+    if cat is True:
+        output_to_stderr = True
+        click.echo(msg.as_string())
+
     if account_name is None:
-        account = account_manager.get_matching_account_for_incoming_message(msg)
+        try:
+            account = account_manager.get_matching_account_for_incoming_message(
+                msg)
+        except Exception as e:
+            click.echo("{}, skipping processing".format(
+                e), err=output_to_stderr)
+            return
+
     else:
         account = account_manager.get_account(account_name)
 
@@ -276,7 +290,7 @@ def process_incoming(ctx, reparse, account_name):
     else:
         msg = "no Autocrypt header found"
     click.echo("processed mail for account '{}', {}".format(
-               r.account.name, msg))
+               r.account.name, msg), err=output_to_stderr)
 
 
 @mycommand("scandir-incoming")
