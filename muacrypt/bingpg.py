@@ -63,7 +63,7 @@ class BinGPG(object):
     """ basic wrapper for gpg command line invocations. """
     InvocationFailure = InvocationFailure
 
-    def __init__(self, homedir=None, gpgpath="gpg"):
+    def __init__(self, homedir=None, gpgpath="gpg", gpgmode="own"):
         """
         :type homedir: unicode or None
         :param homedir: gpg home directory, if None system gpg homedir is used.
@@ -75,17 +75,20 @@ class BinGPG(object):
             the path to the binary under the system's PATH.
             If we can not determine an eventual binary
             we raise ValueError.
+        :type gpgmode: unicode
+        :param gpgmode: gpgmode, 'own' or 'system'
         """
         self.homedir = homedir
         p = find_executable(gpgpath)
         if p is None:
             raise ValueError("could not find binary for {!r}".format(gpgpath))
         self.gpgpath = p
+        self.gpgmode = gpgmode
         self._ensure_init()
 
     def __str__(self):
-        return "BinGPG(gpgpath={gpgpath!r}, homedir={homedir!r})".format(
-            gpgpath=self.gpgpath, homedir=self.homedir)
+        return "BinGPG(gpgpath={gpgpath!r}, homedir={homedir!r}, gpgmode={gpgmode})".format(
+            gpgpath=self.gpgpath, homedir=self.homedir, gpgmode=self.gpgmode)
 
     @cached_property
     def _version_info(self):
@@ -142,6 +145,8 @@ class BinGPG(object):
 
     @cached_property
     def _nopassphrase(self):
+        if self.gpgmode == 'system':
+            return []
         opts = ["--passphrase", "123"]
         if self.isgpg21:
             opts.append("--pinentry-mode=loopback")

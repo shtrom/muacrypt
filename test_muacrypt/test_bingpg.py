@@ -42,6 +42,12 @@ def test_find_executable_not_existing(tmpdir):
         BinGPG(tmpdir.strpath, gpgpath="123")
 
 
+def test_nopassphrase_system(tmpdir, gpgpath):
+    bn = os.path.basename(gpgpath)
+    b = BinGPG(tmpdir.strpath, gpgpath=bn, gpgmode='system')
+    assert len(b._nopassphrase()) == 0
+
+
 @pytest.mark.parametrize("id1,id2", [
     ("90123456", "1234567890123456"),
     ("1234567890123456", "1234567890123456"),

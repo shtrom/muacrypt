@@ -280,7 +280,7 @@ class Account:
         if gpghome == -1 or not self.ownstate.gpgbin:
             raise NotInitialized(
                 "AccountManager directory {!r} not initialized".format(self.dir))
-        return BinGPG(homedir=gpghome, gpgpath=self.ownstate.gpgbin)
+        return BinGPG(homedir=gpghome, gpgpath=self.ownstate.gpgbin, gpgmode=gpgmode)
 
     def make_ac_header(self, emailadr):
         """ return Autocrypt header value which uses our own
